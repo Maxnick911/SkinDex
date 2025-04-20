@@ -25,7 +25,7 @@ SkinDex is an Android application and it fetches and displays posts from the JSO
 1. Clone the repository:
 
    ```
-   git clone https://github.com/Maxnick911/SkinDex.git
+   git clone https://github.com/Maxnick911/SkinDex
    ```
 
 2. Open the project in Android Studio.
