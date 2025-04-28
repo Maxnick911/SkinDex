@@ -10,15 +10,24 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "org.jetbrains.kotlin.jvm") {
+                useVersion("2.1.0")
+            }
+        }
+    }
 }
+
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         google()
         mavenCentral()
+        gradlePluginPortal()
     }
 }
 
 rootProject.name = "SkinDex"
 include(":app")
- 
+include(":backend")

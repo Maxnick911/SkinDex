@@ -1,31 +1,32 @@
 [versions]
-kotlin = "2.0.20"
-ksp = "2.0.20-1.0.24"
-agp = "8.9.1"
+kotlin = "2.1.0"
+agp = "8.9.2"
 hilt = "2.51.1"
-navigation = "2.7.7"
+navigation = "2.8.9"
 glide = "4.16.0"
 compiler = "4.16.0"
+navigationSafeArgsGradlePlugin = "2.8.9"
 retrofit = "2.11.0"
 moshi = "1.15.1"
-coreKtx = "1.13.1"
+coreKtx = "1.16.0"
 appcompat = "1.7.0"
 material = "1.12.0"
-activityKtx = "1.9.2"
-fragmentKtx = "1.8.3"
-constraintlayout = "2.1.4"
-lifecycleViewmodelKtx = "2.8.6"
-kotlinxCoroutines = "1.8.1"
-recyclerview = "1.3.2"
+activityKtx = "1.10.1"
+fragmentKtx = "1.8.6"
+constraintlayout = "2.2.1"
+lifecycleViewmodelKtx = "2.8.7"
+kotlinxCoroutines = "1.10.1"
+recyclerview = "1.4.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 tensorflowLite = "2.16.1"
-tensorflowLiteTaskVision = "0.4.4" #
+tensorflowLiteTaskVision = "0.4.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-navigation-safe-args-gradle-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "navigationSafeArgsGradlePlugin" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activityKtx" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
@@ -54,4 +55,4 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

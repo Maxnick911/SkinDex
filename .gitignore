@@ -1,62 +1,18 @@
-# Згенеровані файли під час компіляції
-*.apk
-*.aab
-*.ap_
-*.dex
-*.class
-/build/
-/*/build/
-/app/build/
-
-# Локальні конфігурації Gradle
-.gradle/
-gradle-wrapper.jar
-gradle-wrapper.properties
-
-# Кеш Gradle
-.gradle/
-.gradle/**/*
-/.caches/
-
-# Локальні файли IDE (Android Studio)
+# IDE файли
 .idea/
 *.iml
-*.iws
-/out/
-*.ipr
-*.hprof
-*.log
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
 
-# Локальні конфігурації користувача
+# Gradle
+build/
+.gradle/
+gradle/
+gradlew
+gradlew.bat
+
+# Локальні файли
 local.properties
-
-# Файли кешу та тимчасові файли
-*.swp
-*~
+*.log
 .DS_Store
-*.bak
-*.tmp
 
-# Лог-файли JVM
-hs_err_pid*.log
-
-# Чутливі дані
-*.keystore
-*.jks
-google-services.json
-secrets.properties
-keystore.properties
-
-# Згенеровані файли Hilt і Dagger
-dagger/
-hilt/
-
-# Тимчасові файли для тестування
-/captures/
-
-# Інші тимчасові директорії
-/bin/
-/gen/
+# Docker
+postgres_data/
