@@ -16,23 +16,26 @@ kotlin {
     }
 }
 
-//repositories {
-//    mavenCentral()
-//    gradlePluginPortal()
-//}
-
 dependencies {
     implementation("io.ktor:ktor-server-core:3.1.2")
     implementation("io.ktor:ktor-server-netty:3.1.2")
     implementation("io.ktor:ktor-server-content-negotiation:3.1.2")
     implementation("io.ktor:ktor-serialization-jackson:3.1.2")
-    implementation("org.jetbrains.exposed:exposed-core:0.61.0")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.61.0")
-    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:0.61.0")
+//    implementation("org.jetbrains.exposed:exposed-core:0.61.0")
+//    implementation("org.jetbrains.exposed:exposed-jdbc:0.61.0")
+//    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:0.61.0")
+//    implementation("org.jetbrains.exposed:exposed-dao:0.61.0")
+    implementation("org.jetbrains.exposed:exposed-core:0.48.0")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.48.0")
+    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:0.48.0")
+    implementation("org.jetbrains.exposed:exposed-dao:0.48.0")
     implementation("org.postgresql:postgresql:42.7.3")
+    implementation("org.slf4j:slf4j-api:2.0.17")
     implementation("ch.qos.logback:logback-classic:1.4.11")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
+    implementation("org.mindrot:jbcrypt:0.4")
+    implementation("org.flywaydb:flyway-core:9.22.3")
 }
 
 application {

@@ -1,7 +1,7 @@
 [versions]
-kotlin = "2.1.0"
+kotlin = "2.1.20"
 agp = "8.9.2"
-hilt = "2.51.1"
+hilt = "2.55"
 navigation = "2.8.9"
 glide = "4.16.0"
 compiler = "4.16.0"
@@ -15,7 +15,7 @@ activityKtx = "1.10.1"
 fragmentKtx = "1.8.6"
 constraintlayout = "2.2.1"
 lifecycleViewmodelKtx = "2.8.7"
-kotlinxCoroutines = "1.10.1"
+kotlinxCoroutines = "1.10.2"
 recyclerview = "1.4.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -39,7 +39,7 @@ androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
-compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "compiler" }
+compiler = { module = "com.github.bumptech.glide:ksp", version.ref = "compiler" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit" }
 moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }

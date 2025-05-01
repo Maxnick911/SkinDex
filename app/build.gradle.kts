@@ -4,6 +4,7 @@ plugins {
     id("kotlin-kapt")
     id("androidx.navigation.safeargs.kotlin")
     id("dagger.hilt.android.plugin")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -68,7 +69,7 @@ dependencies {
     kapt(libs.hilt.compiler)
     implementation(libs.androidx.recyclerview)
     implementation(libs.glide)
-    kapt(libs.compiler)
+    ksp(libs.compiler)
     implementation(libs.tensorflow.lite)
     implementation(libs.tensorflow.lite.task.vision)
     implementation(libs.tensorflow.lite.gpu)
