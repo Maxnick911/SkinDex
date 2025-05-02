@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm")// version "2.1.0"
+    kotlin("jvm")
     id("application")
     id("java-library")
     id("com.github.johnrengelman.shadow") version "8.1.1"
@@ -17,25 +17,23 @@ kotlin {
 }
 
 dependencies {
-    implementation("io.ktor:ktor-server-core:3.1.2")
-    implementation("io.ktor:ktor-server-netty:3.1.2")
-    implementation("io.ktor:ktor-server-content-negotiation:3.1.2")
-    implementation("io.ktor:ktor-serialization-jackson:3.1.2")
-//    implementation("org.jetbrains.exposed:exposed-core:0.61.0")
-//    implementation("org.jetbrains.exposed:exposed-jdbc:0.61.0")
-//    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:0.61.0")
-//    implementation("org.jetbrains.exposed:exposed-dao:0.61.0")
-    implementation("org.jetbrains.exposed:exposed-core:0.48.0")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.48.0")
-    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:0.48.0")
-    implementation("org.jetbrains.exposed:exposed-dao:0.48.0")
-    implementation("org.postgresql:postgresql:42.7.3")
-    implementation("org.slf4j:slf4j-api:2.0.17")
-    implementation("ch.qos.logback:logback-classic:1.4.11")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
-    implementation("org.mindrot:jbcrypt:0.4")
-    implementation("org.flywaydb:flyway-core:9.22.3")
+    implementation(libs.ktor.server.core)
+    implementation(libs.ktor.server.netty)
+    implementation(libs.ktor.server.content.negotiation)
+    implementation(libs.io.ktor.ktor.serialization.jackson)
+    implementation(libs.ktor.server.auth.jwt)
+    implementation(libs.java.jwt)
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.jdbc)
+    implementation(libs.exposed.kotlin.datetime)
+    implementation(libs.exposed.dao)
+    implementation(libs.postgresql)
+    implementation(libs.slf4j.api)
+    implementation(libs.logback.classic)
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.kotlinx.coroutines.core.v1101)
+    implementation(libs.jbcrypt)
+    implementation(libs.flyway.core)
 }
 
 application {
