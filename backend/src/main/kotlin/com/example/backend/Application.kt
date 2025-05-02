@@ -34,22 +34,11 @@ fun Application.configureDatabase() {
     val databaseUser = System.getenv("DATABASE_USER") ?: "admin"
     val databasePassword = System.getenv("DATABASE_PASSWORD") ?: "secret"
 
-    var attempts = 0
-    val maxAttempts = 15
-    while (attempts < maxAttempts) {
-        try {
-            Flyway.configure()
-                .dataSource(databaseUrl, databaseUser, databasePassword)
-                .locations("db/migration")
-                .load()
-                .migrate()
-            break
-        } catch (e: org.flywaydb.core.api.FlywayException) {
-            attempts++
-            if (attempts == maxAttempts) throw e
-            Thread.sleep(3000)
-        }
-    }
+    Flyway.configure()
+        .dataSource(databaseUrl, databaseUser, databasePassword)
+        .locations("db/migration")
+        .load()
+        .migrate()
 
     val database = try {
         Database.connect(
