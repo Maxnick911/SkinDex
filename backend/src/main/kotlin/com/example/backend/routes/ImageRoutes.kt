@@ -17,7 +17,7 @@ import java.io.File
 
 fun Route.imageRoutes() {
     authenticate("auth-jwt") {
-        // image - add
+        // upload image
         post("/upload-image") {
             try {
                 val principal = call.principal<JWTPrincipal>()
@@ -71,7 +71,7 @@ fun Route.imageRoutes() {
             }
         }
 
-        // image - get all
+        // get all images
         get("/images") {
             val principal = call.principal<JWTPrincipal>()
             val userId = principal?.payload?.getClaim("userId")?.asInt()
@@ -95,7 +95,7 @@ fun Route.imageRoutes() {
             call.respond(HttpStatusCode.OK, mapOf("data" to images))
         }
 
-        // image - get by id
+        // get image by id
         get("/images/{id}") {
             val imageId = call.parameters["id"]?.toIntOrNull() ?: return@get call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()
@@ -119,7 +119,7 @@ fun Route.imageRoutes() {
             ))
         }
 
-        // image - update
+        // update image
         put("/images/{id}") {
             val imageId = call.parameters["id"]?.toIntOrNull() ?: return@put call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()
@@ -138,7 +138,7 @@ fun Route.imageRoutes() {
             call.respond(HttpStatusCode.OK, mapOf("message" to "Image updated"))
         }
 
-        // image - delete
+        // delete image
         delete("/images/{id}") {
             val imageId = call.parameters["id"]?.toIntOrNull() ?: return@delete call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()

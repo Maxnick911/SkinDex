@@ -1,4 +1,4 @@
-package com.example.backend
+package com.example.backend.routes
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
@@ -25,12 +25,12 @@ fun Application.configureRouting() {
     val jwtAudience = System.getenv("JWT_AUDIENCE") ?: "http://localhost:8080"
 
     routing {
-        // base - check server
+        // check server
         get("/") {
             call.respond(HttpStatusCode.OK, mapOf("message" to "OK"))
         }
 
-        // base - test database
+        // test database
         get("/test-db") {
             val count = transaction {
                 Users.selectAll().count()
@@ -38,7 +38,7 @@ fun Application.configureRouting() {
             call.respond(HttpStatusCode.OK, mapOf("data" to mapOf("userCount" to count)))
         }
 
-        // user - add
+        // register
         post("/register") {
             try {
                 val userInput = call.receive<UserRegisterInput>()
@@ -89,7 +89,7 @@ fun Application.configureRouting() {
             }
         }
 
-        // user - login
+        // login
         post("/login") {
             try {
                 val loginInput = call.receive<UserLoginInput>()
@@ -118,7 +118,7 @@ fun Application.configureRouting() {
             }
         }
 
-        // base - protected test
+        // protected test
         authenticate("auth-jwt") {
             get("/protected") {
                 val principal = call.principal<JWTPrincipal>()
@@ -133,7 +133,7 @@ fun Application.configureRouting() {
         diagnosisRoutes()
 
         authenticate("auth-jwt") {
-            // log - get all
+            // get all logs
             get("/logs") {
                 val principal = call.principal<JWTPrincipal>()
                 val role = principal?.payload?.getClaim("role")?.asString()
@@ -146,7 +146,7 @@ fun Application.configureRouting() {
                 call.respond(HttpStatusCode.OK, mapOf("data" to logs))
             }
 
-            // log - get by id
+            // get log by id
             get("/logs/{id}") {
                 val logId = call.parameters["id"]?.toIntOrNull() ?: return@get call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
                 val principal = call.principal<JWTPrincipal>()

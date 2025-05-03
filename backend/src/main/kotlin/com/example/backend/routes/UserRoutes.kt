@@ -13,7 +13,7 @@ import com.example.backend.models.*
 
 fun Route.userRoutes() {
     authenticate("auth-jwt") {
-        // user - get all
+        // get all users
         get("/users") {
             val principal = call.principal<JWTPrincipal>()
             val role = principal?.payload?.getClaim("role")?.asString()
@@ -31,7 +31,7 @@ fun Route.userRoutes() {
             call.respond(HttpStatusCode.OK, mapOf("data" to users))
         }
 
-        // user - get by id
+        // get user by id
         get("/users/{id}") {
             val userId = call.parameters["id"]?.toIntOrNull() ?: return@get call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()
@@ -50,7 +50,7 @@ fun Route.userRoutes() {
             ))
         }
 
-        // user - update
+        // update user
         put("/users/{id}") {
             val userId = call.parameters["id"]?.toIntOrNull() ?: return@put call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()
@@ -67,7 +67,7 @@ fun Route.userRoutes() {
             call.respond(HttpStatusCode.OK, mapOf("message" to "User updated"))
         }
 
-        // user - delete
+        // delete user
         delete("/users/{id}") {
             val userId = call.parameters["id"]?.toIntOrNull() ?: return@delete call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()

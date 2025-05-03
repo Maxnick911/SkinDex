@@ -13,7 +13,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 fun Route.diagnosisRoutes() {
     authenticate("auth-jwt") {
-        // diagnosis - get all
+        // get all diagnoses
         get("/diagnoses") {
             val principal = call.principal<JWTPrincipal>()
             val userId = principal?.payload?.getClaim("userId")?.asInt()
@@ -34,7 +34,7 @@ fun Route.diagnosisRoutes() {
             call.respond(HttpStatusCode.OK, mapOf("data" to diagnoses))
         }
 
-        // diagnosis - get by id
+        // get diagnosis by id
         get("/diagnoses/{id}") {
             val diagnosisId = call.parameters["id"]?.toIntOrNull() ?: return@get call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()
@@ -58,7 +58,7 @@ fun Route.diagnosisRoutes() {
             ))
         }
 
-        // diagnosis - update
+        // update diagnosis
         put("/diagnoses/{id}") {
             val diagnosisId = call.parameters["id"]?.toIntOrNull() ?: return@put call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()
@@ -81,7 +81,7 @@ fun Route.diagnosisRoutes() {
             call.respond(HttpStatusCode.OK, mapOf("message" to "Diagnosis updated"))
         }
 
-        // diagnosis - delete
+        // delete diagnosis
         delete("/diagnoses/{id}") {
             val diagnosisId = call.parameters["id"]?.toIntOrNull() ?: return@delete call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()
