@@ -1,5 +1,6 @@
 package com.example.backend
 
+import com.example.backend.models.Users
 import io.ktor.server.application.*
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database

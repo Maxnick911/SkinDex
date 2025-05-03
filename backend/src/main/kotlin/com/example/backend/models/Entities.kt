@@ -1,4 +1,4 @@
-package com.example.backend
+package com.example.backend.models
 
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.datetime

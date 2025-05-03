@@ -1,4 +1,4 @@
-package com.example.backend
+package com.example.backend.models
 
 import java.util.regex.Pattern
 
