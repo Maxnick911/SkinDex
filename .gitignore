@@ -1,18 +1,64 @@
-# IDE файли
+# IDE files
 .idea/
 *.iml
+*.iws
+*.ipr
 
-# Gradle
+# Gradle 
 build/
 .gradle/
-gradle/
-gradlew
-gradlew.bat
+# gradlew і gradlew.bat залишаємо
+# gradlew
+# gradlew.bat
 
-# Локальні файли
+# local files
 local.properties
 *.log
+*.env
 .DS_Store
+Thumbs.db
+application.local.conf
+application.local.yaml
 
-# Docker
-postgres_data/
+# Android (app)
+app/build/
+app/release/
+app/debug/
+*.apk
+*.aab
+*.ap_
+*.dex
+captures/
+output/
+generated/
+*.keystore
+*.jks
+*.cer
+
+# Ktor (backend)
+backend/out/
+backend/test-results/
+backend/*.class
+backend/*.jar
+backend/uploads/
+
+# Docker (backend)
+backend/postgres_data/
+backend/docker-compose.override.yml
+
+# Python (model in backend)
+backend/*.pyc
+backend/__pycache__/
+backend/*.pyo
+backend/*.pyd
+backend/*.egg-info/
+backend/dist/
+backend/build/
+backend/*.egg
+backend/.venv/
+backend/venv/
+backend/env/
+backend/*.ipynb_checkpoints/
+backend/model_weights/
+backend/*.h5
+backend/*.pth
