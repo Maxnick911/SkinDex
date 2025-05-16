@@ -10,34 +10,108 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import com.example.backend.models.*
+import io.ktor.server.application.log
+import org.mindrot.jbcrypt.BCrypt
+import java.io.File
+import java.util.UUID
 
 fun Route.userRoutes() {
     authenticate("auth-jwt") {
-        // get all users
         get("/users") {
             val principal = call.principal<JWTPrincipal>()
             val role = principal?.payload?.getClaim("role")?.asString()
-            if (role != "admin") return@get call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Only admins can access"))
+            val userId = principal?.payload?.getClaim("userId")?.asInt()
+            if (role != "admin" && role != "doctor") {
+                return@get call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Only admins or doctors can access"))
+            }
             val users = transaction {
-                Users.selectAll().map {
+                val query = if (role == "admin") {
+                    Users.selectAll()
+                } else {
+                    Users.selectAll().where { Users.role eq "patient" }
+                }
+                query.map {
                     mapOf(
                         "id" to it[Users.id],
                         "email" to it[Users.email],
                         "role" to it[Users.role],
-                        "name" to it[Users.name]
+                        "name" to it[Users.name],
                     )
                 }
             }
             call.respond(HttpStatusCode.OK, mapOf("data" to users))
         }
 
-        // get user by id
+        post("/add-patient") {
+            try {
+                val principal = call.principal<JWTPrincipal>()
+                val doctorId = principal?.payload?.getClaim("userId")?.asInt()
+                if (doctorId == null) {
+                    return@post call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Invalid token"))
+                }
+
+                val patientInput = call.receive<PatientInput>()
+                if (!isValidEmail(patientInput.email)) {
+                    return@post call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid email format"))
+                }
+                if (patientInput.name.isBlank()) {
+                    return@post call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Name cannot be empty"))
+                }
+
+                val normalizedEmail = patientInput.email.lowercase()
+                val existingUser = transaction {
+                    Users.selectAll().where { Users.email eq normalizedEmail }.firstOrNull()
+                }
+                if (existingUser != null) {
+                    return@post call.respond(HttpStatusCode.Conflict, mapOf("error" to "Email already registered"))
+                }
+
+                val randomPassword = UUID.randomUUID().toString().substring(0, 8)
+                val hashedPassword = BCrypt.hashpw(randomPassword, BCrypt.gensalt())
+                val patientId = transaction {
+                    Users.insert {
+                        it[role] = "patient"
+                        it[name] = patientInput.name
+                        it[email] = normalizedEmail
+                        it[passwordHash] = hashedPassword
+                        it[Users.doctorId] = doctorId
+                    } get Users.id
+                }
+
+                call.respond(HttpStatusCode.Created, mapOf("message" to "Patient created with ID: $patientId"))
+            } catch (e: Exception) {
+                application.log.error("Error in /add-patient: ${e.message}", e)
+                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Server error: ${e.message}"))
+            }
+        }
+
+        get("/patients") {
+            try {
+                val principal = call.principal<JWTPrincipal>()
+                val doctorId = principal?.payload?.getClaim("userId")?.asInt()
+                if (doctorId == null) {
+                    return@get call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "Invalid token"))
+                }
+
+                val patients = transaction {
+                    Users.selectAll().where { Users.doctorId eq doctorId }
+                        .map { mapOf("id" to it[Users.id], "email" to it[Users.email], "name" to it[Users.name]) }
+                }
+                call.respond(HttpStatusCode.OK, patients)
+            } catch (e: Exception) {
+                application.log.error("Error in /patients: ${e.message}", e)
+                call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Server error: ${e.message}"))
+            }
+        }
+
         get("/users/{id}") {
             val userId = call.parameters["id"]?.toIntOrNull() ?: return@get call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()
             val currentUserId = principal?.payload?.getClaim("userId")?.asInt()
             val role = principal?.payload?.getClaim("role")?.asString()
-            if (role != "admin" && currentUserId != userId) return@get call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Access denied"))
+            if (role != "admin" && currentUserId != userId && role != "doctor") {
+                return@get call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Access denied"))
+            }
             val user = transaction { Users.selectAll().where { Users.id eq userId }.firstOrNull() }
             if (user == null) return@get call.respond(HttpStatusCode.NotFound, mapOf("error" to "User not found"))
             call.respond(HttpStatusCode.OK, mapOf(
@@ -45,18 +119,19 @@ fun Route.userRoutes() {
                     "id" to user[Users.id],
                     "email" to user[Users.email],
                     "role" to user[Users.role],
-                    "name" to user[Users.name]
+                    "name" to user[Users.name],
                 )
             ))
         }
 
-        // update user
         put("/users/{id}") {
             val userId = call.parameters["id"]?.toIntOrNull() ?: return@put call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()
             val currentUserId = principal?.payload?.getClaim("userId")?.asInt()
             val role = principal?.payload?.getClaim("role")?.asString()
-            if (role != "admin" && currentUserId != userId) return@put call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Access denied"))
+            if (role != "admin" && currentUserId != userId) {
+                return@put call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Access denied"))
+            }
             val input = call.receive<Map<String, String>>()
             val name = input["name"] ?: return@put call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Name required"))
             transaction {
@@ -67,15 +142,24 @@ fun Route.userRoutes() {
             call.respond(HttpStatusCode.OK, mapOf("message" to "User updated"))
         }
 
-        // delete user
         delete("/users/{id}") {
             val userId = call.parameters["id"]?.toIntOrNull() ?: return@delete call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()
             val role = principal?.payload?.getClaim("role")?.asString()
-            if (role != "admin") return@delete call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Only admins can delete"))
-            val deleted = transaction { Users.deleteWhere { Users.id eq userId } }
-            if (deleted == 0) return@delete call.respond(HttpStatusCode.NotFound, mapOf("error" to "User not found"))
-            call.respond(HttpStatusCode.OK, mapOf("message" to "User deleted"))
+            if (role != "admin" && role != "doctor") {
+                return@delete call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Only admins or doctors can delete"))
+            }
+
+            transaction {
+                val images = Images.selectAll().where { Images.patientId eq userId }.toList()
+                images.forEach { image ->
+                    Diagnoses.deleteWhere { Diagnoses.imageId eq image[Images.id] }
+                    File(image[Images.filePath]).delete()
+                }
+                Images.deleteWhere { Images.patientId eq userId }
+                Users.deleteWhere { id eq userId }
+            }
+            call.respond(HttpStatusCode.OK, mapOf("message" to "User and related data deleted"))
         }
     }
 }

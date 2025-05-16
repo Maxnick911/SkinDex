@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_more"
+        android:icon="@android:drawable/arrow_down_float"
+        android:title="@string/more"
+        app:showAsAction="always">
+        <menu>
+            <group android:id="@+id/menu_group_actions">
+                <item
+                    android:id="@+id/action_add_patient"
+                    android:title="@string/add_patient" />
+                <item
+                    android:id="@+id/action_classify"
+                    android:title="@string/classify" />
+            </group>
+            <group android:id="@+id/menu_group_logout">
+                <item
+                    android:id="@+id/action_logout_menu"
+                    android:title="@string/log_out"
+                    app:actionMenuTextAppearance="@color/error_red" />
+            </group>
+        </menu>
+    </item>
+
+</menu>

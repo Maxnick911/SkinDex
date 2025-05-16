@@ -31,7 +31,7 @@ dependencies {
     implementation(libs.slf4j.api)
     implementation(libs.logback.classic)
     implementation(libs.kotlin.stdlib)
-    implementation(libs.kotlinx.coroutines.core.v1101)
+    implementation(libs.kotlinx.coroutines.core)
     implementation(libs.jbcrypt)
     implementation(libs.flyway.core)
 }

@@ -8,5 +8,10 @@ RUN ls -la /app/backend/build/libs || echo "Directory /app/backend/build/libs no
 
 FROM openjdk:17-jdk-slim
 WORKDIR /app
+
+RUN mkdir -p /app/uploads && \
+    chmod 777 /app/uploads
+
 COPY --from=build /app/backend/build/libs/backend.jar /app/backend.jar
+
 CMD ["java", "-jar", "/app/backend.jar"]

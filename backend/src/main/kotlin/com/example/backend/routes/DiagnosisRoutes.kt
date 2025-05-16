@@ -13,28 +13,79 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 fun Route.diagnosisRoutes() {
     authenticate("auth-jwt") {
-        // get all diagnoses
+        post("/diagnoses") {
+            val principal = call.principal<JWTPrincipal>()
+            val userId = principal?.payload?.getClaim("userId")?.asInt()
+            val role = principal?.payload?.getClaim("role")?.asString()
+            if (role != "doctor") {
+                return@post call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Only doctors can add diagnoses"))
+            }
+
+            val input = call.receive<Map<String, String>>()
+            val imageId = input["imageId"]?.toIntOrNull() ?: return@post call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Image ID required"))
+            val diagnosis = input["diagnosis"] ?: return@post call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Diagnosis required"))
+            val probability = input["probability"]?.toBigDecimalOrNull() ?: return@post call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Probability required"))
+
+            val image = transaction { Images.selectAll().where { Images.id eq imageId }.firstOrNull() }
+            if (image == null) return@post call.respond(HttpStatusCode.NotFound, mapOf("error" to "Image not found"))
+            if (image[Images.qualityStatus] != "accepted") return@post call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Image must be accepted"))
+            if (image[Images.patientId] == null) return@post call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Image must be associated with a patient"))
+
+            val patient = transaction { Users.selectAll().where { Users.id eq image[Images.patientId]!! }.firstOrNull() }
+            if (patient == null || patient[Users.role] != "patient") return@post call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid patient"))
+
+            val diagnosisId = transaction {
+                Diagnoses.insert {
+                    it[Diagnoses.imageId] = imageId
+                    it[Diagnoses.diagnosis] = diagnosis
+                    it[Diagnoses.probability] = probability
+                } get Diagnoses.id
+            }
+
+            transaction {
+                Logs.insert {
+                    it[Logs.userId] = userId
+                    it[action] = "Added diagnosis"
+                    it[details] = "Diagnosis ID: $diagnosisId for Image ID: $imageId"
+                }
+            }
+
+            call.respond(HttpStatusCode.Created, mapOf("message" to "Diagnosis created with ID: $diagnosisId"))
+        }
+
         get("/diagnoses") {
             val principal = call.principal<JWTPrincipal>()
             val userId = principal?.payload?.getClaim("userId")?.asInt()
             val role = principal?.payload?.getClaim("role")?.asString()
+            val imageId = call.request.queryParameters["imageId"]?.toIntOrNull()
+
             val diagnoses = transaction {
-                Diagnoses.selectAll().where {
-                    if (role == "admin") Op.TRUE else Images.id eq Diagnoses.imageId and
-                            if (role == "doctor") Images.userId eq userId else Images.patientId eq userId
-                }.map {
-                    mapOf(
-                        "id" to it[Diagnoses.id],
-                        "imageId" to it[Diagnoses.imageId],
-                        "diagnosis" to it[Diagnoses.diagnosis],
-                        "probability" to it[Diagnoses.probability]
-                    )
-                }
+                (Diagnoses innerJoin Images)
+                    .selectAll()
+                    .where {
+                        val baseCondition = if (role == "admin") Op.TRUE
+                        else if (role == "doctor") Images.userId eq userId
+                        else if (role == "patient") Images.patientId eq userId
+                        else Op.FALSE
+
+                        if (imageId != null) {
+                            baseCondition and (Diagnoses.imageId eq imageId)
+                        } else {
+                            baseCondition
+                        }
+                    }
+                    .map {
+                        mapOf(
+                            "id" to it[Diagnoses.id],
+                            "imageId" to it[Diagnoses.imageId],
+                            "diagnosis" to it[Diagnoses.diagnosis],
+                            "probability" to it[Diagnoses.probability]
+                        )
+                    }
             }
             call.respond(HttpStatusCode.OK, mapOf("data" to diagnoses))
         }
 
-        // get diagnosis by id
         get("/diagnoses/{id}") {
             val diagnosisId = call.parameters["id"]?.toIntOrNull() ?: return@get call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()
@@ -44,7 +95,9 @@ fun Route.diagnosisRoutes() {
                 Diagnoses.selectAll().where { Diagnoses.id eq diagnosisId }.firstOrNull()
             }
             if (diagnosis == null) return@get call.respond(HttpStatusCode.NotFound, mapOf("error" to "Diagnosis not found"))
-            val image = transaction { Images.selectAll().where { Images.id eq diagnosis[Diagnoses.imageId] }.firstOrNull() }
+            val image = transaction {
+                Images.selectAll().where { Images.id eq diagnosis[Diagnoses.imageId] }.firstOrNull()
+            }
             if (role != "admin" && image?.get(Images.userId) != userId && image?.get(Images.patientId) != userId) {
                 return@get call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Access denied"))
             }
@@ -58,17 +111,20 @@ fun Route.diagnosisRoutes() {
             ))
         }
 
-        // update diagnosis
         put("/diagnoses/{id}") {
             val diagnosisId = call.parameters["id"]?.toIntOrNull() ?: return@put call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()
             val userId = principal?.payload?.getClaim("userId")?.asInt()
             val role = principal?.payload?.getClaim("role")?.asString()
-            val diagnosis = transaction { Diagnoses.selectAll().where { Diagnoses.id eq diagnosisId }.firstOrNull() }
+            val diagnosis = transaction {
+                Diagnoses.selectAll().where { Diagnoses.id eq diagnosisId }.firstOrNull()
+            }
             if (diagnosis == null) return@put call.respond(HttpStatusCode.NotFound, mapOf("error" to "Diagnosis not found"))
-            val image = transaction { Images.selectAll().where { Images.id eq diagnosis[Diagnoses.imageId] }.firstOrNull() }
-            if (role != "admin" && role != "doctor" && image?.get(Images.userId) != userId) {
-                return@put call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Access denied"))
+            val image = transaction {
+                Images.selectAll().where { Images.id eq diagnosis[Diagnoses.imageId] }.firstOrNull()
+            }
+            if (role != "admin" && role != "doctor") {
+                return@put call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Only admins or doctors can update diagnoses"))
             }
             val input = call.receive<Map<String, String>>()
             val newDiagnosis = input["diagnosis"] ?: return@put call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Diagnosis required"))
@@ -81,19 +137,24 @@ fun Route.diagnosisRoutes() {
             call.respond(HttpStatusCode.OK, mapOf("message" to "Diagnosis updated"))
         }
 
-        // delete diagnosis
         delete("/diagnoses/{id}") {
             val diagnosisId = call.parameters["id"]?.toIntOrNull() ?: return@delete call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()
             val userId = principal?.payload?.getClaim("userId")?.asInt()
             val role = principal?.payload?.getClaim("role")?.asString()
-            val diagnosis = transaction { Diagnoses.selectAll().where { Diagnoses.id eq diagnosisId }.firstOrNull() }
-            if (diagnosis == null) return@delete call.respond(HttpStatusCode.NotFound, mapOf("error" to "Diagnosis not found"))
-            val image = transaction { Images.selectAll().where { Images.id eq diagnosis[Diagnoses.imageId] }.firstOrNull() }
-            if (role != "admin" && role != "doctor" && image?.get(Images.userId) != userId) {
-                return@delete call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Access denied"))
+            val diagnosis = transaction {
+                Diagnoses.selectAll().where { Diagnoses.id eq diagnosisId }.firstOrNull()
             }
-            transaction { Diagnoses.deleteWhere { Diagnoses.id eq diagnosisId } }
+            if (diagnosis == null) return@delete call.respond(HttpStatusCode.NotFound, mapOf("error" to "Diagnosis not found"))
+            val image = transaction {
+                Images.selectAll().where { Images.id eq diagnosis[Diagnoses.imageId] }.firstOrNull()
+            }
+            if (role != "admin" && role != "doctor") {
+                return@delete call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Only admins or doctors can delete diagnoses"))
+            }
+            transaction {
+                Diagnoses.deleteWhere { id eq diagnosisId }
+            }
             call.respond(HttpStatusCode.OK, mapOf("message" to "Diagnosis deleted"))
         }
     }

@@ -7,11 +7,11 @@ import org.jetbrains.exposed.sql.kotlin.datetime.CurrentDateTime
 
 object Users : Table() {
     val id = integer("id").autoIncrement()
-    val role = varchar("role", 20)
-    val name = varchar("name", 255)
     val email = varchar("email", 255).uniqueIndex()
     val passwordHash = varchar("password_hash", 255)
-    val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
+    val role = varchar("role", 50)
+    val name = varchar("name", 255)
+    val doctorId = integer("doctor_id").references(id).nullable()
 
     override val primaryKey = PrimaryKey(id)
 }
