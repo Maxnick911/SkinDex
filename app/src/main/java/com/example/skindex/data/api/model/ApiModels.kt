@@ -51,3 +51,8 @@ data class SingleImageResponse(val data: ImageResponse)
 
 @JsonClass(generateAdapter = true)
 data class SingleDiagnosisResponse(val data: DiagnosisResponse)
+
+@JsonClass(generateAdapter = true)
+data class PatientListResponse(
+    val data: List<Patient>
+)

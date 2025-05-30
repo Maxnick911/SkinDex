@@ -27,7 +27,7 @@ fun Route.userRoutes() {
                 val query = if (role == "admin") {
                     Users.selectAll()
                 } else {
-                    Users.select { Users.role eq "patient" }
+                    Users.selectAll().where { Users.role eq "patient" }
                 }
                 query.map {
                     mapOf(
@@ -59,7 +59,7 @@ fun Route.userRoutes() {
 
                 val normalizedEmail = patientInput.email.lowercase()
                 val existingUser = transaction {
-                    Users.select { Users.email eq normalizedEmail }.firstOrNull()
+                    Users.selectAll().where { Users.email eq normalizedEmail }.firstOrNull()
                 }
                 if (existingUser != null) {
                     return@post call.respond(HttpStatusCode.Conflict, mapOf("error" to "Email already registered"))
@@ -94,7 +94,7 @@ fun Route.userRoutes() {
                 }
 
                 val patients = transaction {
-                    Users.select { Users.doctorId eq doctorId }
+                    Users.selectAll().where { (Users.doctorId eq doctorId) and (Users.role eq "patient") }
                         .map {
                             mapOf(
                                 "id" to it[Users.id].value,
@@ -103,6 +103,7 @@ fun Route.userRoutes() {
                             )
                         }
                 }
+
                 call.respond(HttpStatusCode.OK, mapOf("data" to patients))
             } catch (e: Exception) {
                 application.log.error("Error in /patients: ${e.message}", e)
@@ -119,7 +120,7 @@ fun Route.userRoutes() {
             if (role != "admin" && currentUserId != paramId && role != "doctor") {
                 return@get call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Access denied"))
             }
-            val user = transaction { Users.select { Users.id eq paramId }.firstOrNull() }
+            val user = transaction { Users.selectAll().where { Users.id eq paramId }.firstOrNull() }
             if (user == null) {
                 return@get call.respond(HttpStatusCode.NotFound, mapOf("error" to "User not found"))
             }
@@ -162,7 +163,7 @@ fun Route.userRoutes() {
             }
 
             transaction {
-                val imagesForPatient = Images.select { Images.patientId eq paramId }.toList()
+                val imagesForPatient = Images.selectAll().where { Images.patientId eq paramId }.toList()
                 imagesForPatient.forEach { image ->
                     Diagnoses.deleteWhere { Diagnoses.imageId eq image[Images.id].value }
                     File(image[Images.filePath]).delete()

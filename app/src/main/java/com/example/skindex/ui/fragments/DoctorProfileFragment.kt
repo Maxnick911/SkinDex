@@ -25,7 +25,11 @@ class DoctorProfileFragment : Fragment() {
     private val viewModel: DoctorProfileViewModel by viewModels()
     private lateinit var patientsAdapter: PatientsAdapter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentDoctorProfileBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -37,6 +41,8 @@ class DoctorProfileFragment : Fragment() {
         setupObservers()
         setupListeners()
 
+        // Дістаємо токен і userId, а потім передаємо в методи fetchDoctorInfo і fetchPatients
+        // (припустимо, що SecureStorage і JwtUtils інжектяться у ViewModel)
         viewModel.fetchDoctorInfo()
         viewModel.fetchPatients()
     }
@@ -48,7 +54,7 @@ class DoctorProfileFragment : Fragment() {
             findNavController().navigate(action)
         }
         binding.patientsRecyclerView.apply {
-            layoutManager = LinearLayoutManager(context)
+            layoutManager = LinearLayoutManager(requireContext())
             adapter = patientsAdapter
         }
     }
@@ -61,15 +67,16 @@ class DoctorProfileFragment : Fragment() {
 
         viewModel.patients.observe(viewLifecycleOwner) { patients ->
             patientsAdapter.submitList(patients)
+            binding.patientsRecyclerView.visibility = if (patients.isEmpty()) View.GONE else View.VISIBLE
         }
 
-        viewModel.error.observe(viewLifecycleOwner) { error ->
-            Snackbar.make(binding.root, error, Snackbar.LENGTH_LONG).show()
+        viewModel.error.observe(viewLifecycleOwner) { errorMsg ->
+            Snackbar.make(binding.root, errorMsg, Snackbar.LENGTH_LONG).show()
         }
 
         viewModel.patientAdded.observe(viewLifecycleOwner) { success ->
             if (success) {
-                Toast.makeText(context, "Patient added", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Patient added", Toast.LENGTH_SHORT).show()
                 viewModel.fetchPatients()
             }
         }

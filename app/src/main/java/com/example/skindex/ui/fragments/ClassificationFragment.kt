@@ -110,7 +110,8 @@ class ClassificationFragment : Fragment(), CropImageView.OnCropImageCompleteList
     private fun showPatientSelectionDialog() {
         lifecycleScope.launch {
             try {
-                val patients = api.getPatients()
+                val response = api.getPatients()
+                val patients = response.data
                 if (patients.isEmpty()) {
                     AlertDialog.Builder(requireContext())
                         .setTitle(R.string.no_patients)
@@ -131,10 +132,11 @@ class ClassificationFragment : Fragment(), CropImageView.OnCropImageCompleteList
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()
             } catch (e: Exception) {
-                Snackbar.make(b.root, R.string.error_loading_patients, Snackbar.LENGTH_LONG).show()
+                Snackbar.make(requireView(), R.string.error_loading_patients, Snackbar.LENGTH_LONG).show()
             }
         }
     }
+
 
     private fun showClassificationResult(result: String) {
         val raw = result.split("\n").mapNotNull {

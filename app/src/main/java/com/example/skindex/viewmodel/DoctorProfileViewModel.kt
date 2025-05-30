@@ -1,11 +1,13 @@
 package com.example.skindex.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.skindex.core.util.JwtUtils
 import com.example.skindex.data.api.model.Patient
+import com.example.skindex.data.api.model.PatientListResponse
 import com.example.skindex.data.api.model.auth.PatientRegisterRequest
 import com.example.skindex.data.api.service.ApiService
 import com.example.skindex.data.storage.SecureStorage
@@ -14,21 +16,23 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class DoctorProfileViewModel @Inject constructor(private val apiService: ApiService,
-                                                 private val secureStorage: SecureStorage,
-                                                 private val jwtUtils: JwtUtils) : ViewModel() {
+class DoctorProfileViewModel @Inject constructor(
+    private val apiService: ApiService,
+    private val secureStorage: SecureStorage,
+    private val jwtUtils: JwtUtils
+) : ViewModel() {
 
     private val _doctorInfo = MutableLiveData<Patient>()
-    val doctorInfo: LiveData<Patient> get() = _doctorInfo
+    val doctorInfo: LiveData<Patient> = _doctorInfo
 
     private val _patients = MutableLiveData<List<Patient>>()
-    val patients: LiveData<List<Patient>> get() = _patients
+    val patients: LiveData<List<Patient>> = _patients
 
     private val _error = MutableLiveData<String>()
-    val error: LiveData<String> get() = _error
+    val error: LiveData<String> = _error
 
     private val _patientAdded = MutableLiveData<Boolean>()
-    val patientAdded: LiveData<Boolean> get() = _patientAdded
+    val patientAdded: LiveData<Boolean> = _patientAdded
 
     fun fetchDoctorInfo() {
         viewModelScope.launch {
@@ -50,14 +54,14 @@ class DoctorProfileViewModel @Inject constructor(private val apiService: ApiServ
 
                 _doctorInfo.postValue(
                     Patient(
-                        id    = data.id,
-                        name  = data.name,
+                        id = data.id,
+                        name = data.name,
                         email = data.email
                     )
                 )
-
             } catch (e: Exception) {
-                _error.postValue("Error: ${e.message}")
+                _error.postValue("Error fetching doctor info: ${e.message}")
+                Log.d("DoctorProfileVM", "fetchDoctorInfo error: ${e.message}")
             }
         }
     }
@@ -65,10 +69,11 @@ class DoctorProfileViewModel @Inject constructor(private val apiService: ApiServ
     fun fetchPatients() {
         viewModelScope.launch {
             try {
-                val patients = apiService.getPatients()
-                _patients.postValue(patients)
+                val response: PatientListResponse = apiService.getPatients()
+                _patients.postValue(response.data)
             } catch (e: Exception) {
                 _error.postValue("Network error: ${e.message}")
+                Log.d("DoctorProfileVM", "fetchPatients error: ${e.message}")
             }
         }
     }
@@ -85,6 +90,7 @@ class DoctorProfileViewModel @Inject constructor(private val apiService: ApiServ
                 }
             } catch (e: Exception) {
                 _error.postValue("Network error: ${e.message}")
+                Log.d("DoctorProfileVM", "addPatient error: ${e.message}")
             }
         }
     }
