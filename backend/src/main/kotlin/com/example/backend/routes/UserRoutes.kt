@@ -11,7 +11,6 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import com.example.backend.models.*
 import io.ktor.server.application.log
-import org.jetbrains.exposed.dao.id.EntityID
 import org.mindrot.jbcrypt.BCrypt
 import java.io.File
 import java.util.UUID
@@ -21,7 +20,6 @@ fun Route.userRoutes() {
         get("/users") {
             val principal = call.principal<JWTPrincipal>()
             val role = principal?.payload?.getClaim("role")?.asString()
-            val userId = principal?.payload?.getClaim("userId")?.asInt()
             if (role != "admin" && role != "doctor") {
                 return@get call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Only admins or doctors can access"))
             }
@@ -29,7 +27,7 @@ fun Route.userRoutes() {
                 val query = if (role == "admin") {
                     Users.selectAll()
                 } else {
-                    Users.selectAll().where { Users.role eq "patient" }
+                    Users.select { Users.role eq "patient" }
                 }
                 query.map {
                     mapOf(
@@ -61,7 +59,7 @@ fun Route.userRoutes() {
 
                 val normalizedEmail = patientInput.email.lowercase()
                 val existingUser = transaction {
-                    Users.selectAll().where { Users.email eq normalizedEmail }.firstOrNull()
+                    Users.select { Users.email eq normalizedEmail }.firstOrNull()
                 }
                 if (existingUser != null) {
                     return@post call.respond(HttpStatusCode.Conflict, mapOf("error" to "Email already registered"))
@@ -69,6 +67,7 @@ fun Route.userRoutes() {
 
                 val randomPassword = UUID.randomUUID().toString().substring(0, 8)
                 val hashedPassword = BCrypt.hashpw(randomPassword, BCrypt.gensalt())
+
                 val patientId = transaction {
                     Users.insert {
                         it[role] = "patient"
@@ -79,7 +78,7 @@ fun Route.userRoutes() {
                     } get Users.id
                 }
 
-                call.respond(HttpStatusCode.Created, mapOf("message" to "Patient created with ID: $patientId"))
+                call.respond(HttpStatusCode.Created, mapOf("message" to "Patient created with ID: ${patientId.value}"))
             } catch (e: Exception) {
                 application.log.error("Error in /add-patient: ${e.message}", e)
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Server error: ${e.message}"))
@@ -95,7 +94,7 @@ fun Route.userRoutes() {
                 }
 
                 val patients = transaction {
-                    Users.selectAll().where { Users.doctorId eq doctorId }
+                    Users.select { Users.doctorId eq doctorId }
                         .map {
                             mapOf(
                                 "id" to it[Users.id].value,
@@ -104,7 +103,7 @@ fun Route.userRoutes() {
                             )
                         }
                 }
-                call.respond(HttpStatusCode.OK, patients)
+                call.respond(HttpStatusCode.OK, mapOf("data" to patients))
             } catch (e: Exception) {
                 application.log.error("Error in /patients: ${e.message}", e)
                 call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Server error: ${e.message}"))
@@ -112,37 +111,41 @@ fun Route.userRoutes() {
         }
 
         get("/users/{id}") {
-            val userId = call.parameters["id"]?.toIntOrNull() ?: return@get call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
+            val paramId = call.parameters["id"]?.toIntOrNull()
+                ?: return@get call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()
             val currentUserId = principal?.payload?.getClaim("userId")?.asInt()
             val role = principal?.payload?.getClaim("role")?.asString()
-            if (role != "admin" && currentUserId != userId && role != "doctor") {
+            if (role != "admin" && currentUserId != paramId && role != "doctor") {
                 return@get call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Access denied"))
             }
-            val user = transaction { Users.selectAll().where { Users.id eq userId }.firstOrNull() }
-            if (user == null) return@get call.respond(HttpStatusCode.NotFound, mapOf("error" to "User not found"))
+            val user = transaction { Users.select { Users.id eq paramId }.firstOrNull() }
+            if (user == null) {
+                return@get call.respond(HttpStatusCode.NotFound, mapOf("error" to "User not found"))
+            }
             call.respond(HttpStatusCode.OK, mapOf(
                 "data" to mapOf(
-                    "id" to user[Users.id],
+                    "id" to user[Users.id].value,
                     "email" to user[Users.email],
                     "role" to user[Users.role],
-                    "name" to user[Users.name],
+                    "name" to user[Users.name]
                 )
             ))
         }
 
         put("/users/{id}") {
-            val userId = call.parameters["id"]?.toIntOrNull() ?: return@put call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
+            val paramId = call.parameters["id"]?.toIntOrNull()
+                ?: return@put call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()
             val currentUserId = principal?.payload?.getClaim("userId")?.asInt()
             val role = principal?.payload?.getClaim("role")?.asString()
-            if (role != "admin" && currentUserId != userId) {
+            if (role != "admin" && currentUserId != paramId) {
                 return@put call.respond(HttpStatusCode.Forbidden, mapOf("error" to "Access denied"))
             }
             val input = call.receive<Map<String, String>>()
             val name = input["name"] ?: return@put call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Name required"))
             transaction {
-                Users.update({ Users.id eq userId }) {
+                Users.update({ Users.id eq paramId }) {
                     it[Users.name] = name
                 }
             }
@@ -150,7 +153,8 @@ fun Route.userRoutes() {
         }
 
         delete("/users/{id}") {
-            val userId = call.parameters["id"]?.toIntOrNull() ?: return@delete call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
+            val paramId = call.parameters["id"]?.toIntOrNull()
+                ?: return@delete call.respond(HttpStatusCode.BadRequest, mapOf("error" to "Invalid ID"))
             val principal = call.principal<JWTPrincipal>()
             val role = principal?.payload?.getClaim("role")?.asString()
             if (role != "admin" && role != "doctor") {
@@ -158,13 +162,13 @@ fun Route.userRoutes() {
             }
 
             transaction {
-                val images = Images.selectAll().where { Images.patientId eq userId }.toList()
-                images.forEach { image ->
-                    Diagnoses.imageId eq image[Images.id].value
+                val imagesForPatient = Images.select { Images.patientId eq paramId }.toList()
+                imagesForPatient.forEach { image ->
+                    Diagnoses.deleteWhere { Diagnoses.imageId eq image[Images.id].value }
                     File(image[Images.filePath]).delete()
                 }
-                Images.deleteWhere { Images.patientId eq userId }
-                Users.deleteWhere { id eq userId }
+                Images.deleteWhere { Images.patientId eq paramId }
+                Users.deleteWhere { Users.id eq paramId }
             }
             call.respond(HttpStatusCode.OK, mapOf("message" to "User and related data deleted"))
         }
