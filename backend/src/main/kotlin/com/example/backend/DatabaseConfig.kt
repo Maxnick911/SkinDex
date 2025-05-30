@@ -10,15 +10,18 @@ import java.net.URI
 
 fun parseRenderDatabaseUrl(): Triple<String, String, String> {
     val databaseUrl = System.getenv("DATABASE_URL")
-    if (databaseUrl != null && databaseUrl.startsWith("postgres://")) {
+    println("DATABASE_URL from environment: $databaseUrl")
+    if (databaseUrl != null && databaseUrl.startsWith("postgresql://")) {
         val uri = URI(databaseUrl)
         val userInfo = uri.userInfo.split(":")
         val jdbcUrl = "jdbc:postgresql://${uri.host}:${uri.port}${uri.path}"
+        println("Parsed JDBC URL: $jdbcUrl, User: ${userInfo[0]}, Password: ${userInfo[1]}")
         return Triple(jdbcUrl, userInfo[0], userInfo[1])
     } else {
         val fallbackUrl = "jdbc:postgresql://db:5432/skindex"
         val fallbackUser = "admin"
         val fallbackPassword = "secret"
+        println("Using fallback: $fallbackUrl, User: $fallbackUser, Password: $fallbackPassword")
         return Triple(fallbackUrl, fallbackUser, fallbackPassword)
     }
 }
@@ -26,23 +29,19 @@ fun parseRenderDatabaseUrl(): Triple<String, String, String> {
 fun Application.configureDatabase() {
     val (databaseUrl, databaseUser, databasePassword) = parseRenderDatabaseUrl()
 
+    val (jdbcUrl, username, password) = parseRenderDatabaseUrl()
     Flyway.configure()
-        .dataSource(databaseUrl, databaseUser, databasePassword)
+        .dataSource(jdbcUrl, username, password)
         .locations("db/migration")
         .load()
         .migrate()
 
-    val database = try {
-        Database.connect(
-            url = databaseUrl,
-            driver = "org.postgresql.Driver",
-            user = databaseUser,
-            password = databasePassword
-        )
-    } catch (e: Exception) {
-        println("Failed to connect to database: ${e.message}")
-        throw e
-    }
+    val database = Database.connect(
+        url = jdbcUrl,
+        driver = "org.postgresql.Driver",
+        user = username,
+        password = password
+    )
 
     try {
         transaction(database) {
