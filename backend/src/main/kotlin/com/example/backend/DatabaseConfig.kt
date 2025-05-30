@@ -12,9 +12,11 @@ fun parseRenderDatabaseUrl(): Triple<String, String, String> {
     val databaseUrl = System.getenv("DATABASE_URL")
     println("DATABASE_URL from environment: $databaseUrl")
     if (databaseUrl != null && databaseUrl.startsWith("postgresql://")) {
-        val uri = URI(databaseUrl)
+        val cleanedUrl = databaseUrl.replace("postgresql://", "http://")
+        val uri = URI(cleanedUrl)
         val userInfo = uri.userInfo.split(":")
-        val jdbcUrl = "jdbc:postgresql://${uri.host}:${uri.port}${uri.path}"
+        val port = if (uri.port == -1) 5432 else uri.port
+        val jdbcUrl = "jdbc:postgresql://${uri.host}:$port${uri.path}"
         println("Parsed JDBC URL: $jdbcUrl, User: ${userInfo[0]}, Password: ${userInfo[1]}")
         return Triple(jdbcUrl, userInfo[0], userInfo[1])
     } else {
