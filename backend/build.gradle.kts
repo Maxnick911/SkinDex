@@ -34,6 +34,12 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.jbcrypt)
     implementation(libs.flyway.core)
+    implementation(libs.testng)
+    implementation(libs.jupiter.junit.jupiter)
+    testImplementation(libs.kotlin.test)
+    implementation(kotlin("test"))
+    testImplementation(libs.ktor.server.test.host)
+    testImplementation(libs.junit.jupiter)
 }
 
 application {

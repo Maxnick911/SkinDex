@@ -6,11 +6,25 @@ import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.net.URI
+
+fun parseRenderDatabaseUrl(): Triple<String, String, String> {
+    val databaseUrl = System.getenv("DATABASE_URL")
+    if (databaseUrl != null && databaseUrl.startsWith("postgres://")) {
+        val uri = URI(databaseUrl)
+        val userInfo = uri.userInfo.split(":")
+        val jdbcUrl = "jdbc:postgresql://${uri.host}:${uri.port}${uri.path}"
+        return Triple(jdbcUrl, userInfo[0], userInfo[1])
+    } else {
+        val fallbackUrl = "jdbc:postgresql://db:5432/skindex"
+        val fallbackUser = "admin"
+        val fallbackPassword = "secret"
+        return Triple(fallbackUrl, fallbackUser, fallbackPassword)
+    }
+}
 
 fun Application.configureDatabase() {
-    val databaseUrl = System.getenv("DATABASE_URL") ?: "jdbc:postgresql://db:5432/skindex?createDatabaseIfNotExist=true"
-    val databaseUser = System.getenv("DATABASE_USER") ?: "admin"
-    val databasePassword = System.getenv("DATABASE_PASSWORD") ?: "secret"
+    val (databaseUrl, databaseUser, databasePassword) = parseRenderDatabaseUrl()
 
     Flyway.configure()
         .dataSource(databaseUrl, databaseUser, databasePassword)
