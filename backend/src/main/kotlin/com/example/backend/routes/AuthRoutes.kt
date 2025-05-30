@@ -56,14 +56,18 @@ fun Application.configureRouting() {
                 }
 
                 val hashedPassword = BCrypt.hashpw(userInput.password, BCrypt.gensalt())
-                val userId = transaction {
-                    Users.insert {
+                val userId: Int = transaction {
+                    val insertedId = Users.insertAndGetId {
                         it[role] = "doctor"
                         it[name] = userInput.name
                         it[email] = normalizedEmail
                         it[passwordHash] = hashedPassword
                         it[doctorId] = null
-                    } get Users.id
+                    }
+                    Users.update({ Users.id eq insertedId }) {
+                        it[doctorId] = insertedId.value
+                    }
+                    insertedId.value
                 }
 
                 call.respond(HttpStatusCode.Created, mapOf("message" to "User created with ID: $userId"))
@@ -88,7 +92,7 @@ fun Application.configureRouting() {
                 .withClaim("email", user[Users.email])
                 .withClaim("name", user[Users.name])
                 .withClaim("role", user[Users.role])
-                .withClaim("userId", user[Users.id])
+                .withClaim("userId", user[Users.id].value)
                 .withExpiresAt(Date(System.currentTimeMillis() + 604800000))
                 .sign(Algorithm.HMAC256(jwtSecret))
 
