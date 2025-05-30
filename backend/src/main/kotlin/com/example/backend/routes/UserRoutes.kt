@@ -33,10 +33,10 @@ fun Route.userRoutes() {
                 }
                 query.map {
                     mapOf(
-                        "id" to it[Users.id],
+                        "id" to it[Users.id].value,
                         "email" to it[Users.email],
                         "role" to it[Users.role],
-                        "name" to it[Users.name],
+                        "name" to it[Users.name]
                     )
                 }
             }
@@ -96,7 +96,13 @@ fun Route.userRoutes() {
 
                 val patients = transaction {
                     Users.selectAll().where { Users.doctorId eq doctorId }
-                        .map { mapOf("id" to it[Users.id], "email" to it[Users.email], "name" to it[Users.name]) }
+                        .map {
+                            mapOf(
+                                "id" to it[Users.id].value,
+                                "email" to it[Users.email],
+                                "name" to it[Users.name]
+                            )
+                        }
                 }
                 call.respond(HttpStatusCode.OK, patients)
             } catch (e: Exception) {
