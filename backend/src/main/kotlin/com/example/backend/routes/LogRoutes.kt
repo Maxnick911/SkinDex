@@ -18,7 +18,7 @@ fun Route.logRoutes() {
             val logs = transaction {
                 Logs.selectAll().map {
                     mapOf(
-                        "id" to it[Logs.id],
+                        "id" to it[Logs.id].value,
                         "userId" to it[Logs.userId],
                         "action" to it[Logs.action],
                         "details" to it[Logs.details],
@@ -38,7 +38,7 @@ fun Route.logRoutes() {
             if (log == null) return@get call.respond(HttpStatusCode.NotFound, mapOf("error" to "Log not found"))
             call.respond(HttpStatusCode.OK, mapOf(
                 "data" to mapOf(
-                    "id" to log[Logs.id],
+                    "id" to log[Logs.id].value,
                     "userId" to log[Logs.userId],
                     "action" to log[Logs.action],
                     "details" to log[Logs.details],

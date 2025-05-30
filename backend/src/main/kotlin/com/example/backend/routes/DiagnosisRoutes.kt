@@ -46,11 +46,11 @@ fun Route.diagnosisRoutes() {
                 Logs.insert {
                     it[Logs.userId] = userId
                     it[action] = "Added diagnosis"
-                    it[details] = "Diagnosis ID: $diagnosisId for Image ID: $imageId"
+                    it[details] = "Diagnosis ID: ${diagnosisId.value} for Image ID: $imageId"
                 }
             }
 
-            call.respond(HttpStatusCode.Created, mapOf("message" to "Diagnosis created with ID: $diagnosisId"))
+            call.respond(HttpStatusCode.Created, mapOf("message" to "Diagnosis created with ID: ${diagnosisId.value}"))
         }
 
         get("/diagnoses") {
@@ -76,7 +76,7 @@ fun Route.diagnosisRoutes() {
                     }
                     .map {
                         mapOf(
-                            "id" to it[Diagnoses.id],
+                            "id" to it[Diagnoses.id].value,
                             "imageId" to it[Diagnoses.imageId],
                             "diagnosis" to it[Diagnoses.diagnosis],
                             "probability" to it[Diagnoses.probability]
@@ -103,7 +103,7 @@ fun Route.diagnosisRoutes() {
             }
             call.respond(HttpStatusCode.OK, mapOf(
                 "data" to mapOf(
-                    "id" to diagnosis[Diagnoses.id],
+                    "id" to diagnosis[Diagnoses.id].value,
                     "imageId" to diagnosis[Diagnoses.imageId],
                     "diagnosis" to diagnosis[Diagnoses.diagnosis],
                     "probability" to diagnosis[Diagnoses.probability]

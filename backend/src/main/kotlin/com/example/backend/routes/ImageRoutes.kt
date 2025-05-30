@@ -87,7 +87,7 @@ fun Route.imageRoutes() {
                 application.log.error("Failed to rename $tempFilePath to $newFileName")
             }
 
-            call.respond(HttpStatusCode.OK, mapOf("message" to "Image uploaded with ID: $imageId"))
+            call.respond(HttpStatusCode.OK, mapOf("message" to "Image uploaded with ID: ${imageId.value}"))
         }
 
         get("/images") {
@@ -113,7 +113,7 @@ fun Route.imageRoutes() {
 
                 query.map {
                     mapOf(
-                        "id"            to it[Images.id],
+                        "id"            to it[Images.id].value,
                         "filePath"      to it[Images.filePath],
                         "qualityStatus" to it[Images.qualityStatus],
                         "userId"        to it[Images.userId],
@@ -139,7 +139,7 @@ fun Route.imageRoutes() {
             }
             call.respond(HttpStatusCode.OK, mapOf(
                 "data" to mapOf(
-                    "id" to image[Images.id],
+                    "id" to image[Images.id].value,
                     "filePath" to image[Images.filePath],
                     "qualityStatus" to image[Images.qualityStatus],
                     "userId" to image[Images.userId],
