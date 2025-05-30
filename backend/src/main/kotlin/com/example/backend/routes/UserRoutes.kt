@@ -11,6 +11,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import com.example.backend.models.*
 import io.ktor.server.application.log
+import org.jetbrains.exposed.dao.id.EntityID
 import org.mindrot.jbcrypt.BCrypt
 import java.io.File
 import java.util.UUID
@@ -153,7 +154,7 @@ fun Route.userRoutes() {
             transaction {
                 val images = Images.selectAll().where { Images.patientId eq userId }.toList()
                 images.forEach { image ->
-                    Diagnoses.deleteWhere { Diagnoses.imageId eq image[Images.id] }
+                    Diagnoses.imageId eq image[Images.id].value
                     File(image[Images.filePath]).delete()
                 }
                 Images.deleteWhere { Images.patientId eq userId }
