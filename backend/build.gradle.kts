@@ -3,6 +3,7 @@ plugins {
     id("application")
     id("java-library")
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("org.flywaydb.flyway") version "9.22.3"
 }
 
 java {
@@ -15,6 +16,26 @@ kotlin {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
+
+val databaseUrlFull: String? = System.getenv("DATABASE_URL")
+
+if (databaseUrlFull != null) {
+    val regex = Regex("postgresql://(.*?):(.*?)@(.*?)/(.*?)$")
+    val matchResult = regex.find(databaseUrlFull)
+    if (matchResult != null) {
+        val (user, password, host, database) = matchResult.destructured
+        flyway {
+            url = "jdbc:postgresql://$host/$database"
+            this.user = user
+            this.password = password
+        }
+    } else {
+        println("DATABASE_URL is wrong")
+    }
+} else {
+    println("DATABASE_URL is not environment variable")
+}
+
 
 dependencies {
     implementation(libs.ktor.server.core)
