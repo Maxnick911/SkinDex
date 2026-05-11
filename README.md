@@ -101,18 +101,6 @@ Benefits of on-device inference:
 
 ---
 
-# Architecture
-
-```text
-Android App
-   ↓
-REST API (Ktor Backend)
-   ↓
-PostgreSQL Database
-
-TensorFlow Lite runs locally on the Android device
-```
-
 # Demo Video
 [![Application Work](https://img.youtube.com/vi/nHkgqEz_OAQ/hqdefault.jpg)](https://youtu.be/nHkgqEz_OAQ)
 
