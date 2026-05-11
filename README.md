@@ -136,5 +136,6 @@ This project was created for educational purposes and does not replace professio
 # Author
 
 **Dmytro Vietokhin**
+
 Bachelor Thesis Project
 
