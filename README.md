@@ -116,6 +116,25 @@ TensorFlow Lite runs locally on the Android device
 # Demo Video
 [![Application Work](https://img.youtube.com/vi/nHkgqEz_OAQ/hqdefault.jpg)](https://youtu.be/nHkgqEz_OAQ)
 
-# Project Structure
+# What I Learned
 
+During this project I gained practical experience in:
+
+- Full-stack application development
+- Android architecture with MVVM
+- REST API integration
+- Authentication systems
+- Database design
+- Mobile machine learning deployment
+- Camera and image processing
+- Real-world project planning
+
+# Disclaimer
+
+This project was created for educational purposes and does not replace professional medical diagnosis.
+
+# Author
+
+**Dmytro Vietokhin**
+Bachelor Thesis Project
 
