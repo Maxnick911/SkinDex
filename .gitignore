@@ -7,9 +7,6 @@
 # Gradle 
 build/
 .gradle/
-# gradlew і gradlew.bat залишаємо
-# gradlew
-# gradlew.bat
 
 # local files
 local.properties
