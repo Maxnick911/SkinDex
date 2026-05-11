@@ -114,7 +114,7 @@ TensorFlow Lite runs locally on the Android device
 ```
 
 # Demo Video
-[!Application Work](https://img.youtube.com/vi/nHkgqEz_OAQ/0.jpg)](https://youtu.be/nHkgqEz_OAQ)
+[![Application Work](https://img.youtube.com/vi/nHkgqEz_OAQ/0.jpg)](https://youtu.be/nHkgqEz_OAQ)
 
 # Project Structure
 
