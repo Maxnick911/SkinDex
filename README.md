@@ -1,49 +1,121 @@
-# SkinDex
+# SkinDex - Mobile Dermatology Assistant
 
-SkinDex is an Android application and it fetches and displays posts from the JSONPlaceholder API, showcasing modern Android development practices. The app is planned to be extended into a diploma project for analyzing medical skin images.
+SkinDex is a full-stack Android application developed as a bachelor thesis project for supporting dermatological image classification.
 
-## Features
+The application allows medical staff to manage patients, capture or upload skin images, and classify them locally on the device using a TensorFlow Lite model.
 
-- Fetch and display a list of posts from JSONPlaceholder API.
-- View detailed information for each post.
-- Smooth navigation between screens.
+## Project Goal
 
-## Tech Stack
+The goal of SkinDex is to demonstrate how modern mobile development, backend systems, and machine learning can be combined into a practical healthcare-oriented application.
 
-- **Language**: Kotlin
-- **Architecture**: MVVM
-- **Libraries**:
-  - Jetpack Navigation Component for navigation
-  - Retrofit and Moshi for API requests
-  - Kotlin Coroutines and StateFlow for asynchronous operations
-  - RecyclerView with ListAdapter for efficient list rendering
-  - Hilt for dependency injection
-  - Material 3 for UI design
+---
 
-## Setup
+# Main Features
 
-1. Clone the repository:
+## Authentication
 
-   ```
-   git clone https://github.com/Maxnick911/SkinDex
-   ```
+- Secure doctor registration
+- Login / logout functionality
+- JWT-based authentication
+- Encrypted local token storage
 
-2. Open the project in Android Studio.
+## Patient Management
+- Create patient profiles
+- View patient history
+- Delete patient profiles
+- Store classified images linked to patients
 
-3. Sync the project with Gradle.
+## Image Classification
 
-4. Build and run the app on an emulator or device.
+- Select image from gallery
+- Capture image with camera
+- Crop selected skin area
+- Run local AI classification using TensorFlow Lite
+- Display prediction probabilites in chart format
 
-## Usage
+## Diagnosis History
+- Save analyzed image to patient profile
+- View previous classifications
+- Delete saved results
 
-- Launch the app.
-- Tap the "Fetch Posts" button to load posts from the API.
-- Tap on a post to view its details.
+---
 
-## Future Plans
+# Disease Classes
 
-This project will be extended for a diploma thesis to include medical skin image analysis, potentially integrating machine learning models for skin condition detection.
+The model can classify images into following categories:
 
-## License
+1. Eczema  
+2. Melanoma  
+3. Atopic Dermatitis  
+4. Basal Cell Carcinoma (BCC)  
+5. Melanocytic Nevi (NV)  
+6. Benign Keratosis-like Lesions (BKL)  
+7. Psoriasis / Lichen Planus  
+8. Seborrheic Keratoses / Benign Tumors  
+9. Fungal Infections  
+10. Viral Infections / Warts / Molluscum  
+11. Normal Skin
 
-This project is licensed under the MIT License.
+---
+
+# Machine Learning Model
+
+The original trained model was converted into **TensorFlow Lite** format for mobile deployment.
+
+Benefits of on-device inference:
+
+- Faster prediction speed
+- Smal application size
+- Offline usage possible
+- Improved privacy (images stay on device)
+
+---
+
+# Tech Stack
+
+## Frontend (Android)
+
+- Kotlin
+- MVVM Architecture
+- Android Jetpack
+- Navigation Component
+- RecyclerView
+- Material Design 3
+- Coroutines + StateFlow
+- Hilt Dependency Injection
+- Retrofit + Moshi
+- Glide / Picasso
+- MPAndroidChart
+- CameraX
+- TensorFlow Lite
+
+## Backend
+
+- Kotlin
+- Ktor
+- PostgreSQL
+- Exposed ORM
+- Flyway Migrations
+- JWT Authentication
+- BCrypt Password Hashing
+
+---
+
+# Architecture
+
+```text
+Android App
+   ↓
+REST API (Ktor Backend)
+   ↓
+PostgreSQL Database
+
+TensorFlow Lite runs locally on the Android device
+```
+
+# Demo Video
+[![Application Work](https://youtu.be/nHkgqEz_OAQ)
+
+# Project Structure
+
+
