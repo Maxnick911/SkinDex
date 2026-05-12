@@ -27,7 +27,7 @@ Skindex is a mobile application designed for dermatologists and general practiti
 
 # Demo
 
-[![Watch the application work demonstration](https://githubusercontent.com)]([https://github.com](https://github.com/Maxnick911/SkinDex/blob/main/App%20Work%20Demonstration%20Video.mp4))
+[![Watch the application work demonstration]]([https://drive.google.com/file/d/1tsp9T2EyuZn23nYTfOgPB3jXplSjIB2M/view?usp=sharing])
 
 ## Technology Stack
 
