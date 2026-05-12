@@ -27,7 +27,7 @@ Skindex is a mobile application designed for dermatologists and general practiti
 
 # Demo
 
-Watch the Application Work Demonstration: https://l1nk.dev/tu522jq
+[Watch the Application Work Demonstration](https://l1nk.dev/tu522jq)
 
 ## Technology Stack
 
@@ -64,7 +64,7 @@ Watch the Application Work Demonstration: https://l1nk.dev/tu522jq
 - Docker and Docker Compose
 - Android Studio
 ```
-git clone https://github.com/yourusername/skindex.git
+git clone https://github.com/Maxnick911/skindex.git
 cd skindex
 docker compose up --build -d
 ```
