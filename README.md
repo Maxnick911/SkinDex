@@ -69,8 +69,6 @@
 ```bash
 git clone https://github.com/Maxnick911/skindex.git
 cd skindex
-
-# Start backend and database
 docker compose up --build -d
 ```
 The backend will be available at **http://localhost:8080**.
