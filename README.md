@@ -4,7 +4,7 @@
 
 ## Features
 
-- User registration and authentication (JWT-based)
+- JWT-based user registration and authentication
 - Doctor profile management
 - Patient profile creation and management
 - Skin lesion classification from images:
@@ -39,18 +39,18 @@
 - **Kotlin** + Jetpack Components
 - CameraX
 - Android Image Cropper
-- TensorFlow Lite (optimized `.tflite` model for on-device inference)
+- TensorFlow Lite
 - Retrofit + Moshi + OkHttp
-- Hilt (Dependency Injection)
+- Hilt Dependency Injection
 - MPAndroidChart
 - Glide
 - Kotlin Coroutines
 - Navigation Component
 
 ### Backend
-- **Ktor** (Netty)
+- **Ktor**
 - Exposed ORM + PostgreSQL
-- Flyway (database migrations)
+- Flyway database migrations
 - JWT Authentication
 - BCrypt password hashing
 
